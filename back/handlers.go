@@ -1,70 +1,110 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
-type PDFInfo struct {
-	Name string `json:"name"`
-	Path string `json:"path"`
-}
-
-func listarHandler(w http.ResponseWriter, r *http.Request) {
-	var pdfs []PDFInfo
-
-	filepath.Walk(pdfBasePath, func(path string, info os.FileInfo, err error) error {
-		if err == nil && !info.IsDir() && strings.HasSuffix(strings.ToLower(info.Name()), ".pdf") {
-			relPath, _ := filepath.Rel(pdfBasePath, path)
-			pdfs = append(pdfs, PDFInfo{
-				Name: info.Name(),
-				Path: filepath.ToSlash(relPath),
-			})
-		}
-		return nil
-	})
-
-	writeJSON(w, pdfs)
-}
-
-func buscarHandler(w http.ResponseWriter, r *http.Request) {
-	query := strings.ToLower(r.URL.Query().Get("cadena"))
-	var resultados []PDFInfo
-
-	filepath.Walk(pdfBasePath, func(path string, info os.FileInfo, err error) error {
-		if err == nil && !info.IsDir() && strings.HasSuffix(strings.ToLower(info.Name()), ".pdf") {
-			if strings.Contains(strings.ToLower(info.Name()), query) {
-				relPath, _ := filepath.Rel(pdfBasePath, path)
-				resultados = append(resultados, PDFInfo{
-					Name: info.Name(),
-					Path: filepath.ToSlash(relPath),
-				})
-			}
-		}
-		return nil
-	})
-
-	writeJSON(w, resultados)
-}
-
-func verHandler(w http.ResponseWriter, r *http.Request) {
-	// La ruta viene después de /ver/
-	encodedPath := strings.TrimPrefix(r.URL.Path, "/ver/")
-	decodedPath, err := url.PathUnescape(encodedPath)
+// Lista municipios
+func GetMunicipios(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.Query("SELECT idmunicipios, nombre FROM municipios")
 	if err != nil {
-		http.Error(w, "Ruta inválida", http.StatusBadRequest)
+		http.Error(w, "Error consultando municipios", 500)
+		return
+	}
+	defer rows.Close()
+
+	var municipios []Municipio
+	for rows.Next() {
+		var m Municipio
+		if err := rows.Scan(&m.ID, &m.Nombre); err != nil {
+			http.Error(w, "Error leyendo datos", 500)
+			return
+		}
+		municipios = append(municipios, m)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(municipios)
+}
+
+// Lista localidades por municipio
+func GetLocalidades(w http.ResponseWriter, r *http.Request) {
+	idMunicipio := r.URL.Query().Get("idmunicipio")
+	if idMunicipio == "" {
+		http.Error(w, "Falta idmunicipio", 400)
 		return
 	}
 
-	fullPath := filepath.Join(pdfBasePath, decodedPath)
-	if _, err := os.Stat(fullPath); os.IsNotExist(err) {
-		http.NotFound(w, r)
+	rows, err := db.Query("SELECT idlocalidades, idmunicipio, nombre FROM localidad WHERE idmunicipio = ?", idMunicipio)
+	if err != nil {
+		http.Error(w, "Error consultando localidades", 500)
+		return
+	}
+	defer rows.Close()
+
+	var localidades []Localidad
+	for rows.Next() {
+		var l Localidad
+		if err := rows.Scan(&l.ID, &l.IDMunicipio, &l.Nombre); err != nil {
+			http.Error(w, "Error leyendo datos", 500)
+			return
+		}
+		localidades = append(localidades, l)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(localidades)
+}
+
+// GetPDF devuelve el PDF con la nomenclatura correcta para ruta y nombre de archivo
+func GetPDF(w http.ResponseWriter, r *http.Request) {
+	year := r.URL.Query().Get("year")           // ej: 2010
+	acto := r.URL.Query().Get("acto")           // ej: 1
+	municipio := r.URL.Query().Get("municipio") // ej: 67
+	oficialia := r.URL.Query().Get("oficialia") // ej: 1
+	localidad := r.URL.Query().Get("localidad") // ej: 1
+	numActa := r.URL.Query().Get("numActa")     // ej: 5
+
+	// Validar que todos los parámetros existan
+	if year == "" || acto == "" || municipio == "" || oficialia == "" || localidad == "" || numActa == "" {
+		http.Error(w, "Faltan parámetros", http.StatusBadRequest)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/pdf")
-	http.ServeFile(w, r, fullPath)
+	// Convertir a la nomenclatura correcta con ceros a la izquierda
+	actoFmt := fmt.Sprintf("%1s", acto)            // 1 dígito
+	estado := "20"                                 // siempre 20
+	municipioFmt := fmt.Sprintf("%03s", municipio) // 3 dígitos
+	oficialiaFmt := fmt.Sprintf("%02s", oficialia) // 2 dígitos
+	numActaFmt := fmt.Sprintf("%05s", numActa)     // 5 dígitos
+	localidadFmt := fmt.Sprintf("%03s", localidad) // 3 dígitos
+
+	// Construir nombre del PDF: acto + estado + municipio + oficialía + año + número de acta + localidad + 0
+	fileName := fmt.Sprintf("%s%s%s%s%s%s%s0.pdf",
+		actoFmt, estado, municipioFmt, oficialiaFmt, year, numActaFmt, localidadFmt)
+
+	// Construir ruta completa al PDF
+	pdfPath := filepath.Join(
+		config.PDFBasePath,
+		fmt.Sprintf("decada %s", year[:4]), // decada 2010
+		actoFmt,                            // acto registral
+		year,                               // año específico
+		municipioFmt,                       // municipio
+		oficialiaFmt,                       // oficialía
+		localidadFmt,                       // localidad
+		fileName,                           // nombre del PDF
+	)
+
+	// Verificar si el archivo existe
+	if _, err := os.Stat(pdfPath); os.IsNotExist(err) {
+		http.Error(w, "Archivo no encontrado", http.StatusNotFound)
+		return
+	}
+
+	// Devolver el PDF
+	http.ServeFile(w, r, pdfPath)
 }

@@ -1,41 +1,27 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 )
 
-type Config struct {
-	PDFBasePath string `json:"pdfBasePath"`
-}
-
-var pdfBasePath string
-
-func loadConfig() {
-	data, err := os.ReadFile("config.json")
-	if err != nil {
-		log.Fatalf("Error leyendo config.json: %v", err)
-	}
-
-	var config Config
-	if err := json.Unmarshal(data, &config); err != nil {
-		log.Fatalf("Error parseando config.json: %v", err)
-	}
-
-	pdfBasePath = config.PDFBasePath
-	fmt.Println("📂 Ruta base PDFs:", pdfBasePath)
-}
+var config Config
 
 func main() {
-	loadConfig()
+	var err error
+	config, err = LoadConfig()
+	if err != nil {
+		log.Fatalf("Error cargando config: %v", err)
+	}
 
-	http.HandleFunc("/listar", listarHandler)
-	http.HandleFunc("/buscar", buscarHandler)
-	http.HandleFunc("/ver/", verHandler)
+	ConnectDB(config)
+	defer db.Close()
 
-	fmt.Println("Servidor escuchando en http://localhost:8080")
+	http.HandleFunc("/municipios", GetMunicipios)
+	http.HandleFunc("/localidades", GetLocalidades)
+	http.HandleFunc("/pdf", GetPDF)
+
+	fmt.Println("🚀 Servidor corriendo en http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
