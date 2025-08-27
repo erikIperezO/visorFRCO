@@ -6,7 +6,7 @@ type Municipio struct {
 }
 
 type Localidad struct {
-	ID          int    `json:"id"`
+	ID          int    `json:"idlocalidades"`
 	IDMunicipio int    `json:"id_municipio"`
 	Nombre      string `json:"nombre"`
 }

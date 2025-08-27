@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Visor de PDF - Registro Civil</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        label { display: block; margin-top: 10px; }
+        select, input { width: 200px; padding: 5px; margin-top: 5px; }
+        button { margin-top: 15px; padding: 10px 15px; }
+        iframe { margin-top: 20px; width: 100%; height: 600px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>Visor de PDF - Registro Civil</h1>
+
+    <label>Municipio:</label>
+    <select id="municipioSelect">
+        <option value="">Seleccione municipio</option>
+    </select>
+
+    <label>Localidad:</label>
+    <select id="localidadSelect">
+        <option value="">Seleccione localidad</option>
+    </select>
+
+    <label>Año:</label>
+    <input type="number" id="yearInput" placeholder="Ej. 2010">
+
+    <label>Acto:</label>
+    <input type="number" id="actoInput" placeholder="Ej. 1">
+
+    <label>Oficialía:</label>
+    <input type="number" id="oficialiaInput" placeholder="Ej. 1">
+
+    <label>Número de Acta:</label>
+    <input type="number" id="numActaInput" placeholder="Ej. 5">
+
+    <button id="buscarBtn">Buscar PDF</button>
+<div><button id="prev-page">Anterior</button>
+    <button id="next-page">Siguiente</button></div>
+    <div id="pdf-viewer"></div>
+    
+    
+
+
+    <script src="script.js"></script>
+</body>
+</html>

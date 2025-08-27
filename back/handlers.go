@@ -3,9 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 // Lista municipios
@@ -33,13 +36,14 @@ func GetMunicipios(w http.ResponseWriter, r *http.Request) {
 
 // Lista localidades por municipio
 func GetLocalidades(w http.ResponseWriter, r *http.Request) {
+
 	idMunicipio := r.URL.Query().Get("idmunicipio")
 	if idMunicipio == "" {
 		http.Error(w, "Falta idmunicipio", 400)
 		return
 	}
-
-	rows, err := db.Query("SELECT idlocalidades, idmunicipio, nombre FROM localidad WHERE idmunicipio = ?", idMunicipio)
+	fmt.Println(idMunicipio)
+	rows, err := db.Query("SELECT idlocalidades, idmunicipio, nombre FROM localidades WHERE idmunicipio = ?", idMunicipio)
 	if err != nil {
 		http.Error(w, "Error consultando localidades", 500)
 		return
@@ -60,51 +64,88 @@ func GetLocalidades(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(localidades)
 }
 
-// GetPDF devuelve el PDF con la nomenclatura correcta para ruta y nombre de archivo
-func GetPDF(w http.ResponseWriter, r *http.Request) {
-	year := r.URL.Query().Get("year")           // ej: 2010
-	acto := r.URL.Query().Get("acto")           // ej: 1
-	municipio := r.URL.Query().Get("municipio") // ej: 67
-	oficialia := r.URL.Query().Get("oficialia") // ej: 1
-	localidad := r.URL.Query().Get("localidad") // ej: 1
-	numActa := r.URL.Query().Get("numActa")     // ej: 5
+// obtiene la década a partir de un año (ej: 2015 → "2010")
+func obtenerDecada(year string) (string, error) {
+	if len(year) != 4 {
+		return "", fmt.Errorf("año inválido: %s", year)
+	}
+	// convertimos a int
+	y, err := strconv.Atoi(year)
+	if err != nil {
+		return "", err
+	}
+	decada := (y / 10) * 10
+	return fmt.Sprintf("%d", decada), nil
+}
 
-	// Validar que todos los parámetros existan
+// GetPDFAsImageMagick genera la imagen de un PDF al vuelo usando ImageMagick
+func GetPDFAsImage(w http.ResponseWriter, r *http.Request) {
+	year := r.URL.Query().Get("year")
+	acto := r.URL.Query().Get("acto")
+	municipio := r.URL.Query().Get("municipio")
+	oficialia := r.URL.Query().Get("oficialia")
+	localidad := r.URL.Query().Get("localidad")
+	numActa := r.URL.Query().Get("numActa")
+
+	// Validar parámetros
 	if year == "" || acto == "" || municipio == "" || oficialia == "" || localidad == "" || numActa == "" {
 		http.Error(w, "Faltan parámetros", http.StatusBadRequest)
 		return
 	}
 
-	// Convertir a la nomenclatura correcta con ceros a la izquierda
-	actoFmt := fmt.Sprintf("%1s", acto)            // 1 dígito
-	estado := "20"                                 // siempre 20
-	municipioFmt := fmt.Sprintf("%03s", municipio) // 3 dígitos
-	oficialiaFmt := fmt.Sprintf("%02s", oficialia) // 2 dígitos
-	numActaFmt := fmt.Sprintf("%05s", numActa)     // 5 dígitos
-	localidadFmt := fmt.Sprintf("%03s", localidad) // 3 dígitos
+	// Calcular década
+	decada, err := obtenerDecada(year)
+	if err != nil {
+		http.Error(w, "Año inválido", http.StatusBadRequest)
+		return
+	}
 
-	// Construir nombre del PDF: acto + estado + municipio + oficialía + año + número de acta + localidad + 0
+	// Formatear con ceros a la izquierda
+	actoFmt := fmt.Sprintf("%1s", acto)
+	estado := "20"
+	municipioFmt := fmt.Sprintf("%03s", municipio)
+	oficialiaFmt := fmt.Sprintf("%02s", oficialia)
+	numActaFmt := fmt.Sprintf("%05s", numActa)
+	localidadFmt := fmt.Sprintf("%03s", localidad)
+
+	// Nombre del archivo PDF
 	fileName := fmt.Sprintf("%s%s%s%s%s%s%s0.pdf",
 		actoFmt, estado, municipioFmt, oficialiaFmt, year, numActaFmt, localidadFmt)
 
-	// Construir ruta completa al PDF
+	// Ruta del PDF
 	pdfPath := filepath.Join(
 		config.PDFBasePath,
-		fmt.Sprintf("decada %s", year[:4]), // decada 2010
-		actoFmt,                            // acto registral
-		year,                               // año específico
-		municipioFmt,                       // municipio
-		oficialiaFmt,                       // oficialía
-		localidadFmt,                       // localidad
-		fileName,                           // nombre del PDF
+		fmt.Sprintf("decada %s", decada),
+		actoFmt,
+		year,
+		municipioFmt,
+		oficialiaFmt,
+		localidadFmt,
+		fileName,
 	)
 
-	// Verificar si el archivo existe
+	// Validar existencia del PDF
 	if _, err := os.Stat(pdfPath); os.IsNotExist(err) {
 		http.Error(w, "Archivo no encontrado", http.StatusNotFound)
 		return
 	}
 
-	// Devolver el PDF
-	http.ServeFile(w, r, pdfPath)
+	pythonURL := fmt.Sprintf("http://127.0.0.1:5000/pdf_to_tiles?pdf_path=%s", url.QueryEscape(pdfPath))
+
+	resp, err := http.Get(pythonURL)
+	if err != nil {
+		http.Error(w, "Error llamando microservicio", 500)
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, "Error leyendo respuesta del microservicio", 500)
+		return
+	}
+
+	// Solo reenviar la respuesta JSON al frontend
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(body)
 }
