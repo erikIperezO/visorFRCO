@@ -1,49 +1,164 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Visor de PDF - Registro Civil</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        label { display: block; margin-top: 10px; }
-        select, input { width: 200px; padding: 5px; margin-top: 5px; }
-        button { margin-top: 15px; padding: 10px 15px; }
-        iframe { margin-top: 20px; width: 100%; height: 600px; border: 1px solid #ccc; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Visor de PDF - Registro Civil</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 20px; 
+      background: #f7f7f7;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #444;
+    }
+    .form-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+    select, input {
+      width: 200px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 0.9em;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    #viewer-container {
+      border: 1px solid #ccc;
+      background: white;
+      height: 80vh;
+      overflow: auto;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 10px 0;
+    }
+    #pdf-viewer {
+      transform-origin: top center;
+      transition: transform 0.2s ease;
+      position: relative;
+      width: 100%;
+      max-width: 100%;
+      text-align: center;
+    }
+    #pdf-viewer .pdf-page {
+      margin-bottom: 10px;
+      display: block;
+    }
+    .hidden {
+      display: none;
+    }
+    #pdf-viewer:empty::before {
+      content: "Seleccione un PDF para visualizar";
+      color: #999;
+      font-style: italic;
+      display: block;
+      text-align: center;
+      padding: 50px 20px;
+    }
+
+    /* Loader circular */
+    #loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #007bff;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 100;
+      display: none; /* Oculto por defecto */
+    }
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-    <h1>Visor de PDF - Registro Civil</h1>
+  <h1>Visor de PDF - Registro Civil</h1>
 
-    <label>Municipio:</label>
-    <select id="municipioSelect">
-        <option value="">Seleccione municipio</option>
-    </select>
+  <div class="form-container">
+    <div>
+      <label>Municipio:</label>
+      <select id="municipioSelect">
+          <option value="">Seleccione municipio</option>
+      </select>
+    </div>
+    <div>
+      <label>Localidad:</label>
+      <select id="localidadSelect">
+          <option value="">Seleccione localidad</option>
+      </select>
+    </div>
+    <div>
+      <label>Año:</label>
+      <input type="number" id="yearInput" placeholder="Ej. 2010">
+    </div>
+    <div>
+      <label>Acto:</label>
+      <input type="number" id="actoInput" placeholder="Ej. 1">
+    </div>
+    <div>
+      <label>Oficialía:</label>
+      <input type="number" id="oficialiaInput" placeholder="Ej. 1">
+    </div>
+    <div>
+      <label>Número de Acta:</label>
+      <input type="number" id="numActaInput" placeholder="Ej. 5">
+    </div>
+    <div style="align-self: flex-end;">
+      <button id="buscarBtn">Buscar PDF</button>
+    </div>
+  </div>
 
-    <label>Localidad:</label>
-    <select id="localidadSelect">
-        <option value="">Seleccione localidad</option>
-    </select>
+  <div class="controls">
+    <button id="prev-page" class="hidden">Anterior</button>
+    <button id="next-page" class="hidden">Siguiente</button>
+    <button id="zoom-in">Zoom +</button>
+    <button id="zoom-out">Zoom -</button>
+    <button id="reset-zoom">Restablecer Zoom</button>
+  </div>
 
-    <label>Año:</label>
-    <input type="number" id="yearInput" placeholder="Ej. 2010">
-
-    <label>Acto:</label>
-    <input type="number" id="actoInput" placeholder="Ej. 1">
-
-    <label>Oficialía:</label>
-    <input type="number" id="oficialiaInput" placeholder="Ej. 1">
-
-    <label>Número de Acta:</label>
-    <input type="number" id="numActaInput" placeholder="Ej. 5">
-
-    <button id="buscarBtn">Buscar PDF</button>
-<div><button id="prev-page">Anterior</button>
-    <button id="next-page">Siguiente</button></div>
+  <div id="viewer-container">
+    <div id="loader"></div>
     <div id="pdf-viewer"></div>
-    
-    
+  </div>
 
-
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
