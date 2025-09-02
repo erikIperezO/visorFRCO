@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <title>Visor de PDF - Registro Civil</title>
   <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      margin: 20px; 
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
       background: #f7f7f7;
       color: #333;
     }
@@ -87,7 +87,6 @@
       text-align: center;
       padding: 50px 20px;
     }
-
     /* Loader circular */
     #loader {
       border: 8px solid #f3f3f3;
@@ -101,11 +100,29 @@
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 100;
-      display: none; /* Oculto por defecto */
+      display: none;
     }
     @keyframes spin {
       0% { transform: translate(-50%, -50%) rotate(0deg); }
       100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    /* Dropdown municipios filtrados */
+    #municipioDropdown {
+      position: absolute;
+      background: #fff;
+      border: 1px solid #ccc;
+      max-height: 150px;
+      overflow-y: auto;
+      width: 200px;
+      display: none;
+      z-index: 200;
+    }
+    #municipioDropdown div {
+      padding: 8px;
+      cursor: pointer;
+    }
+    #municipioDropdown div:hover {
+      background: #f0f0f0;
     }
   </style>
 </head>
@@ -113,34 +130,42 @@
   <h1>Visor de PDF - Registro Civil</h1>
 
   <div class="form-container">
-    <div>
+    <div style="position: relative;">
       <label>Municipio:</label>
-      <select id="municipioSelect">
-          <option value="">Seleccione municipio</option>
+      <input type="text" id="municipioSearch" placeholder="Buscar municipio...">
+      <div id="municipioDropdown"></div>
+      <select id="municipioSelect" class="hidden">
+        <option value="">Seleccione municipio</option>
       </select>
     </div>
+
     <div>
       <label>Localidad:</label>
       <select id="localidadSelect">
-          <option value="">Seleccione localidad</option>
+        <option value="">Seleccione localidad</option>
       </select>
     </div>
+
     <div>
       <label>Año:</label>
       <input type="number" id="yearInput" placeholder="Ej. 2010">
     </div>
+
     <div>
       <label>Acto:</label>
       <input type="number" id="actoInput" placeholder="Ej. 1">
     </div>
+
     <div>
       <label>Oficialía:</label>
       <input type="number" id="oficialiaInput" placeholder="Ej. 1">
     </div>
+
     <div>
       <label>Número de Acta:</label>
       <input type="number" id="numActaInput" placeholder="Ej. 5">
     </div>
+
     <div style="align-self: flex-end;">
       <button id="buscarBtn">Buscar PDF</button>
     </div>
