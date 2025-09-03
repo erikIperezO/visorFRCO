@@ -9,8 +9,8 @@ app = Flask(__name__)
 @app.route("/pdf_to_tiles", methods=["GET"])
 def pdf_to_tiles():
     pdf_path = request.args.get("pdf_path")
-    tile_width = 300
-    tile_height = 300
+    tile_width = 200
+    tile_height = 200  
 
     if not pdf_path or not os.path.exists(pdf_path):
         return jsonify({"error": "Archivo no encontrado"}), 404
