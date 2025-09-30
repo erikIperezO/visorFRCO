@@ -19,3 +19,28 @@ type PDFRequest struct {
 	Oficialia string `json:"oficialia"`
 	NumActa   string `json:"num_acta"`
 }
+
+type Usuario struct {
+	ID        int    `json:"id"`
+	Username  string `json:"username"`
+	Password  string `json:"password,omitempty"`
+	Activo    bool   `json:"activo"`
+	RolID     int    `json:"rol_id"`
+	RolNombre string `json:"rol_nombre,omitempty"`
+}
+
+type Rol struct {
+	ID     int    `json:"id"`
+	Nombre string `json:"nombre"`
+}
+
+type AsignacionMunicipio struct {
+	UsuarioID       int    `json:"usuario_id"`
+	MunicipiosIDs   []int  `json:"municipios_ids"`
+	FechaAsignacion string `json:"fecha_asignacion"`
+}
+
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}

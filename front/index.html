@@ -2,188 +2,165 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Visor de PDF - Registro Civil</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #f7f7f7;
-      color: #333;
-    }
-    h1 {
-      text-align: center;
-      color: #444;
-    }
-    .form-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      margin-bottom: 20px;
-      justify-content: center;
-    }
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-      font-size: 0.9em;
-    }
-    select, input {
-      width: 200px;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 0.9em;
-    }
-    button {
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.9em;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    .controls {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    #viewer-container {
-      border: 1px solid #ccc;
-      background: white;
-      height: 80vh;
-      overflow: auto;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 10px 0;
-    }
-    #pdf-viewer {
-      transform-origin: top center;
-      transition: transform 0.2s ease;
-      position: relative;
-      width: 100%;
-      max-width: 100%;
-      text-align: center;
-    }
-    #pdf-viewer .pdf-page {
-      margin-bottom: 10px;
-      display: block;
-    }
-    .hidden {
-      display: none;
-    }
-    #pdf-viewer:empty::before {
-      content: "Seleccione un PDF para visualizar";
-      color: #999;
-      font-style: italic;
-      display: block;
-      text-align: center;
-      padding: 50px 20px;
-    }
-    /* Loader circular */
-    #loader {
-      border: 8px solid #f3f3f3;
-      border-top: 8px solid #007bff;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 1s linear infinite;
-      position: absolute;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 100;
-      display: none;
-    }
-    @keyframes spin {
-      0% { transform: translate(-50%, -50%) rotate(0deg); }
-      100% { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-    /* Dropdown municipios filtrados */
-    #municipioDropdown {
-      position: absolute;
-      background: #fff;
-      border: 1px solid #ccc;
-      max-height: 150px;
-      overflow-y: auto;
-      width: 200px;
-      display: none;
-      z-index: 200;
-    }
-    #municipioDropdown div {
-      padding: 8px;
-      cursor: pointer;
-    }
-    #municipioDropdown div:hover {
-      background: #f0f0f0;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visor de Actas - Registro Civil</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Visor de PDF - Registro Civil</h1>
-
-  <div class="form-container">
-    <div style="position: relative;">
-      <label>Municipio:</label>
-      <input type="text" id="municipioSearch" placeholder="Buscar municipio...">
-      <div id="municipioDropdown"></div>
-      <select id="municipioSelect" class="hidden">
-        <option value="">Seleccione municipio</option>
-      </select>
-    </div>
-
-    <div>
-      <label>Localidad:</label>
-      <select id="localidadSelect">
-        <option value="">Seleccione localidad</option>
-      </select>
-    </div>
-
-    <div>
-      <label>Año:</label>
-      <input type="number" id="yearInput" placeholder="Ej. 2010">
-    </div>
-
-    <div>
-      <label>Acto:</label>
-      <input type="number" id="actoInput" placeholder="Ej. 1">
-    </div>
-
-    <div>
-      <label>Oficialía:</label>
-      <input type="number" id="oficialiaInput" placeholder="Ej. 1">
-    </div>
-
-    <div>
-      <label>Número de Acta:</label>
-      <input type="number" id="numActaInput" placeholder="Ej. 5">
-    </div>
-
-    <div style="align-self: flex-end;">
-      <button id="buscarBtn">Buscar PDF</button>
+  <!-- LOGIN -->
+  <div id="login-container">
+    <div class="login-form">
+      <h2><i class="fas fa-user-shield"></i> Iniciar Sesión</h2>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Usuario</label>
+          <input type="text" id="username" placeholder="Ingrese su usuario" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" placeholder="Ingrese su contraseña" required>
+        </div>
+        <button type="submit" class="login-btn">
+          <i class="fas fa-sign-in-alt"></i> Ingresar
+        </button>
+      </form>
     </div>
   </div>
 
-  <div class="controls">
-    <button id="prev-page" class="hidden">Anterior</button>
-    <button id="next-page" class="hidden">Siguiente</button>
-    <button id="zoom-in">Zoom +</button>
-    <button id="zoom-out">Zoom -</button>
-    <button id="reset-zoom">Restablecer Zoom</button>
-  </div>
+  <!-- MAIN APP -->
+  <div id="main-container" style="display: none;">
+    <div class="container">
+      
+      <!-- INFO DE USUARIO -->
+      <div class="user-info">
+        <i class="fas fa-user-circle" style="font-size: 2rem; color: var(--primary);"></i>
+        <div>
+          <strong id="user-name">Usuario</strong>
+          <div id="user-role" style="font-size: 0.9rem; color: var(--secondary);"></div>
+        </div>
+        <button class="btn btn-secondary" onclick="logout()" style="margin-left: auto;">
+          <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+        </button>
+      </div>
 
-  <div id="viewer-container">
-    <div id="loader"></div>
-    <div id="pdf-viewer"></div>
+      <!-- BUSCADOR -->
+      <section class="search-panel">
+        <div class="panel-title">
+          <i class="fas fa-search"></i>
+          <h2>Búsqueda de actas</h2>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="municipioSearch">Municipio</label>
+            <div class="input-with-icon">
+              <i class="fas fa-city"></i>
+              <input type="text" id="municipioSearch" placeholder="Buscar municipio...">
+              <div id="municipioDropdown"></div>
+              <select id="municipioSelect" class="hidden">
+                <option value="">Seleccione municipio</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="localidadSelect">Localidad</label>
+            <div class="input-with-icon">
+              <i class="fas fa-map-marker-alt"></i>
+              <select id="localidadSelect">
+                <option value="">Seleccione localidad</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="yearInput">Año</label>
+            <div class="input-with-icon">
+              <i class="fas fa-calendar-alt"></i>
+              <input type="number" id="yearInput" placeholder="Ej. 2010" min="1900" max="2030">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="actoInput">Acto</label>
+            <div class="input-with-icon">
+              <i class="fas fa-file-alt"></i>
+              <input type="number" id="actoInput" placeholder="Ej. 1" min="1">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="oficialiaInput">Oficialía</label>
+            <div class="input-with-icon">
+              <i class="fas fa-user-tie"></i>
+              <input type="number" id="oficialiaInput" placeholder="Ej. 1" min="1">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="numActaInput">Número de Acta</label>
+            <div class="input-with-icon">
+              <i class="fas fa-hashtag"></i>
+              <input type="number" id="numActaInput" placeholder="Ej. 5" min="1">
+            </div>
+          </div>
+        </div>
+        
+        <div class="search-actions">
+          <button class="btn btn-secondary" id="limpiarBtn">
+            <i class="fas fa-broom"></i> Limpiar
+          </button>
+          <button class="btn btn-primary" id="buscarBtn">
+            <i class="fas fa-search"></i> Buscar Acta
+          </button>
+        </div>
+      </section>
+      
+      <!-- VISOR DE PDF -->
+      <section class="viewer-panel">
+        <div class="viewer-header">
+          <div class="viewer-title">Vista previa del acta</div>
+          <div class="viewer-controls">
+            <!-- Navegación -->
+            <div class="nav-controls">
+              <button class="btn btn-secondary" id="prev-page">
+                <i class="fas fa-chevron-left"></i> Anterior
+              </button>
+              <button class="btn btn-secondary" id="next-page">
+                Siguiente <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+            <!-- Info de página -->
+            <div class="page-info">
+              <span id="current-page">1</span> de <span id="total-pages">0</span>
+            </div>
+            <!-- Zoom -->
+            <div class="zoom-controls">
+              <button class="zoom-btn" id="zoom-out"><i class="fas fa-search-minus"></i></button>
+              <span class="zoom-level" id="zoom-level">100%</span>
+              <button class="zoom-btn" id="zoom-in"><i class="fas fa-search-plus"></i></button>
+              <button class="zoom-btn" id="reset-zoom"><i class="fas fa-sync-alt"></i></button>
+            </div>
+          </div>
+        </div>
+        
+        <div id="viewer-container">
+          <div id="loader"></div>
+          <div id="pdf-viewer">
+            <div class="empty-state">
+              <i class="fas fa-file-pdf"></i>
+              <h3>No se ha seleccionado un acta</h3>
+              <p>Complete el formulario de búsqueda y haga clic en "Buscar Acta".</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
-
+  
+  <div id="notification" class="notification"></div>
+  
   <script src="script.js"></script>
 </body>
 </html>
