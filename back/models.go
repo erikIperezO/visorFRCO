@@ -35,9 +35,8 @@ type Rol struct {
 }
 
 type AsignacionMunicipio struct {
-	UsuarioID       int    `json:"usuario_id"`
-	MunicipiosIDs   []int  `json:"municipios_ids"`
-	FechaAsignacion string `json:"fecha_asignacion"`
+	UsuarioID     int   `json:"usuario_id"`
+	MunicipiosIDs []int `json:"municipios_ids"`
 }
 
 type LoginRequest struct {

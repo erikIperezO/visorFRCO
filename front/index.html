@@ -8,25 +8,7 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- LOGIN -->
-  <div id="login-container">
-    <div class="login-form">
-      <h2><i class="fas fa-user-shield"></i> Iniciar Sesión</h2>
-      <form id="login-form">
-        <div class="form-group">
-          <label for="username">Usuario</label>
-          <input type="text" id="username" placeholder="Ingrese su usuario" required>
-        </div>
-        <div class="form-group">
-          <label for="password">Contraseña</label>
-          <input type="password" id="password" placeholder="Ingrese su contraseña" required>
-        </div>
-        <button type="submit" class="login-btn">
-          <i class="fas fa-sign-in-alt"></i> Ingresar
-        </button>
-      </form>
-    </div>
-  </div>
+
 
   <!-- MAIN APP -->
   <div id="main-container" style="display: none;">
@@ -48,7 +30,7 @@
       <section class="search-panel">
         <div class="panel-title">
           <i class="fas fa-search"></i>
-          <h2>Búsqueda de actas</h2>
+          <h2>Búsqueda de actas por datos registrales</h2>
         </div>
         
         <div class="form-grid">
@@ -83,15 +65,15 @@
           </div>
           
           <div class="form-group">
-            <label for="actoInput">Acto</label>
+            <label for="actoInput">Acto Registral</label>
             <div class="input-with-icon">
               <i class="fas fa-file-alt"></i>
-              <input type="number" id="actoInput" placeholder="Ej. 1" min="1">
+              <input type="number" id="actoInput" value="1" min="1" disabled>
             </div>
           </div>
           
           <div class="form-group">
-            <label for="oficialiaInput">Oficialía</label>
+            <label for="oficialiaInput">Oficialía N°</label>
             <div class="input-with-icon">
               <i class="fas fa-user-tie"></i>
               <input type="number" id="oficialiaInput" placeholder="Ej. 1" min="1">

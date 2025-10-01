@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Registro Civil Oaxaca</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* styles.css (reemplaza tu archivo actual con este) */
+
+/* Caja universal para evitar desajustes por padding/border */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #005f73, #0a9396);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #333;
+  
+}
+
+/* Contenedor principal: lo hacemos columna y centramos su contenido */
+#login-container {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+  width: 380px;
+  overflow: hidden;
+  animation: fadeIn 0.7s ease-in-out;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* <-- centra hijos horizontalmente */
+}
+
+/* Header ocupa todo el ancho del contenedor pero su contenido queda centrado */
+.login-header {
+  width: 100%;
+  text-align: center;
+  padding: 30px 20px 10px;
+  background: #005f73;
+  color: #fff;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* centra logo y textos */
+  justify-content: center;
+}
+
+.login-header .logo {
+  width: 80px;
+  margin-bottom: 10px;
+}
+
+.login-header h1 {
+  margin: 5px 0;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.login-header .subtitle {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.95;
+}
+
+/* Form container: lo centramos y limitamos el ancho de los campos */
+.login-form {
+  padding: 30px;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* centra las .form-group dentro del form */
+}
+
+/* El título dentro del form ocupa 100% para mantener consistencia */
+.login-form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #005f73;
+  width: 100%;
+}
+
+/* Cada grupo de campo tendrá un ancho máximo y estará centrado */
+.form-group {
+  width: 100%;
+  max-width: 320px; /* controla el ancho de inputs para que queden centrados */
+  margin-bottom: 20px;
+}
+
+/* Labels alineados a la izquierda respecto a su campo centrado */
+.form-group label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #444;
+  text-align: left;
+}
+
+/* Inputs llenan su .form-group (que ya está centrado) */
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #bbb;
+  outline: none;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.form-group input:focus {
+  border-color: #0a9396;
+  box-shadow: 0 0 6px rgba(0, 95, 115, 0.3);
+}
+
+/* Botón centrado con el mismo ancho máximo que inputs */
+.login-btn {
+  width: 100%;
+  max-width: 320px; /* mismo ancho visual que inputs */
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #0a9396;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.login-btn:hover {
+  background: #005f73;
+}
+
+/* Notificación con el mismo ancho visual, centrada */
+.notification {
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+  padding: 10px;
+  font-size: 14px;
+  color: #b71c1c;
+  margin: 12px 0 20px;
+}
+
+@keyframes fadeIn {
+  from {opacity: 0; transform: scale(0.95);}
+  to {opacity: 1; transform: scale(1);}
+}
+
+/* Responsive: ajustar en pantallas muy pequeñas */
+@media (max-width: 420px) {
+  #login-container {
+    width: 92%;
+  }
+  .login-header .logo {
+    width: 64px;
+  }
+  .form-group, .login-btn, .notification {
+    max-width: 100%;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <div id="login-container">
+    <div class="login-header">
+      
+      <h1>Registro Civil Oaxaca</h1>
+      <p class="subtitle">Visor de Actas de Nacimiento</p>
+    </div>
+    <div class="login-form">
+      <h2><i class="fas fa-user-shield"></i> Iniciar Sesión</h2>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Usuario</label>
+          <input type="text" id="username" placeholder="Ingrese su usuario" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" placeholder="Ingrese su contraseña" required>
+        </div>
+        <button type="submit" class="login-btn">
+          <i class="fas fa-sign-in-alt"></i> Ingresar
+        </button>
+      </form>
+    </div>
+    <div id="notification" class="notification"></div>
+  </div>
+
+  <script src="login.js"></script>
+</body>
+</html>

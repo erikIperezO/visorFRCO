@@ -54,7 +54,7 @@ func GetPDFAsImage(w http.ResponseWriter, r *http.Request) {
 		fileName,
 	)
 
-	pythonURL := fmt.Sprintf("http://127.0.0.1:5000/pdf_to_tiles?pdf_path=%s", url.QueryEscape(pdfPath))
+	pythonURL := fmt.Sprintf("http://localhost:5000/pdf_to_tiles?pdf_path=%s", url.QueryEscape(pdfPath))
 
 	resp, err := http.Get(pythonURL)
 	if err != nil {

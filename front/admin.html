@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Panel de administración del sistema de Registro Civil">
   <title>Administración - Registro Civil</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    /* ===== VARIABLES Y RESET ===== */
     :root {
       --primary: #2563eb;
       --primary-dark: #1d4ed8;
@@ -18,6 +20,8 @@
       --gray: #94a3b8;
       --border: #e2e8f0;
       --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --radius: 12px;
+      --transition: all 0.3s ease;
     }
     
     * {
@@ -26,6 +30,7 @@
       box-sizing: border-box;
     }
     
+    /* ===== ESTILOS BASE ===== */
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       line-height: 1.6;
@@ -35,31 +40,62 @@
       padding: 20px;
     }
     
+    /* ===== LAYOUT PRINCIPAL ===== */
     .admin-container {
       max-width: 1400px;
       margin: 0 auto;
     }
     
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .admin-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+    
+    /* ===== COMPONENTES DE PANEL ===== */
     .admin-panel {
       background: white;
-      border-radius: 12px;
+      border-radius: var(--radius);
       padding: 25px;
       box-shadow: var(--shadow);
       margin-bottom: 25px;
     }
     
+    .panel-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    /* ===== SISTEMA DE PESTAÑAS ===== */
     .tabs {
       display: flex;
       border-bottom: 2px solid var(--border);
       margin-bottom: 20px;
+      background: white;
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 0 25px;
     }
     
     .tab {
-      padding: 12px 24px;
+      padding: 15px 24px;
       cursor: pointer;
       border-bottom: 3px solid transparent;
       font-weight: 600;
-      transition: all 0.3s;
+      transition: var(--transition);
+      color: var(--secondary);
+      position: relative;
     }
     
     .tab.active {
@@ -67,127 +103,235 @@
       color: var(--primary);
     }
     
-    .tab:hover {
+    .tab:hover:not(.active) {
       background: var(--light);
+      color: var(--dark);
     }
     
     .tab-content {
       display: none;
+      animation: fadeIn 0.3s ease;
     }
     
     .tab-content.active {
       display: block;
     }
     
-    .users-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-    
-    .user-card {
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 15px;
-      background: var(--light);
-      transition: transform 0.2s;
-    }
-    
-    .user-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow);
-    }
-    
-    .user-card.admin {
-      border-left: 4px solid var(--primary);
-    }
-    
-    .user-card.user {
-      border-left: 4px solid var(--success);
-    }
-    
+    /* ===== SISTEMA DE GRILLAS ===== */
     .form-grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
     }
     
+    /* ===== LISTA DE USUARIOS ===== */
+    .users-table-container {
+      background: white;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    
+    .users-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .users-table thead {
+      background: var(--light);
+      border-bottom: 2px solid var(--border);
+    }
+    
+    .users-table th {
+      padding: 15px 12px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .users-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--secondary);
+    }
+    
+    .users-table tbody tr:hover {
+      background: var(--light);
+    }
+    
+    .users-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-active {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .status-inactive {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    .role-badge {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    
+    .role-admin {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .role-user {
+      background: #dcfce7;
+      color: #166534;
+    }
+    
+    /* ===== COMPONENTES DE FORMULARIO ===== */
     .form-group {
       display: flex;
       flex-direction: column;
     }
     
-    label {
+    .form-label {
       font-weight: 600;
       margin-bottom: 8px;
       color: var(--dark);
       font-size: 0.95rem;
     }
     
-    input, select {
+    .form-input,
+    .form-select {
       width: 100%;
       padding: 12px 15px;
       border: 1px solid var(--border);
       border-radius: 8px;
       font-size: 1rem;
-      transition: all 0.3s;
+      transition: var(--transition);
+      background: white;
     }
     
-    input:focus, select:focus {
+    .form-input:focus,
+    .form-select:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
     
-    .btn {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.3s;
-      font-size: 1rem;
+    /* ===== AUTCOMPLETADO DE USUARIOS ===== */
+    .autocomplete-container {
+      position: relative;
     }
     
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      background: var(--primary-dark);
-      transform: translateY(-2px);
-    }
-    
-    .btn-secondary {
-      background: var(--light);
-      color: var(--dark);
+    .autocomplete-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
       border: 1px solid var(--border);
+      border-radius: 0 0 8px 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: var(--shadow);
+      display: none;
     }
     
-    .btn-secondary:hover {
-      background: #e2e8f0;
+    .autocomplete-list.show {
+      display: block;
+    }
+    
+    .autocomplete-item {
+      padding: 12px 15px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: var(--transition);
+    }
+    
+    .autocomplete-item:hover {
+      background: var(--light);
+    }
+    
+    .autocomplete-item:last-child {
+      border-bottom: none;
+    }
+    
+    .autocomplete-item .username {
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    .autocomplete-item .role {
+      font-size: 0.8rem;
+      color: var(--secondary);
+      margin-left: 8px;
+    }
+    
+    /* ===== FILTROS DE BÚSQUEDA ===== */
+    .search-container {
+      position: relative;
+      margin-bottom: 15px;
+    }
+    
+    .search-input {
+      padding-left: 40px !important;
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray);
+      z-index: 2;
+    }
+    
+    .filter-info {
+      margin-bottom: 15px;
+      color: var(--secondary);
+      font-size: 0.9rem;
+    }
+    
+    /* ===== LISTA DE MUNICIPIOS CON FILTRO ===== */
+    .municipios-container {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .municipios-header {
+      padding: 15px;
+      background: var(--light);
+      border-bottom: 1px solid var(--border);
     }
     
     .municipios-list {
       max-height: 300px;
       overflow-y: auto;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
       background: white;
     }
     
     .municipio-checkbox {
       display: flex;
       align-items: center;
-      padding: 8px;
+      padding: 12px 15px;
       border-bottom: 1px solid var(--border);
-      transition: background 0.2s;
+      transition: var(--transition);
     }
     
     .municipio-checkbox:hover {
@@ -198,6 +342,68 @@
       border-bottom: none;
     }
     
+    .municipio-checkbox input[type="checkbox"] {
+      margin-right: 12px;
+      transform: scale(1.1);
+    }
+    
+    .municipio-checkbox label {
+      cursor: pointer;
+      flex: 1;
+      color: var(--dark);
+    }
+    
+    .municipio-assigned {
+      background: #f0f9ff;
+      border-left: 3px solid var(--primary);
+    }
+    
+    .no-results {
+      padding: 20px;
+      text-align: center;
+      color: var(--gray);
+      font-style: italic;
+    }
+    
+    /* ===== BOTONES ===== */
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+      font-size: 1rem;
+      text-decoration: none;
+      justify-content: center;
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    
+    .btn-secondary {
+      background: var(--light);
+      color: var(--dark);
+      border: 1px solid var(--border);
+    }
+    
+    .btn-secondary:hover {
+      background: #e2e8f0;
+      transform: translateY(-1px);
+    }
+    
+    /* ===== NOTIFICACIONES ===== */
     .notification {
       position: fixed;
       top: 20px;
@@ -210,6 +416,7 @@
       z-index: 1000;
       transform: translateX(150%);
       transition: transform 0.3s ease;
+      max-width: 400px;
     }
     
     .notification.show {
@@ -224,98 +431,372 @@
       background: var(--error);
     }
     
+    /* ===== ESTADOS DE CARGA ===== */
+    .loading {
+      position: relative;
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      border-right-color: transparent;
+      animation: spin 1s linear infinite;
+    }
+    
+    /* ===== ANIMACIONES ===== */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .admin-container {
+        padding: 0 10px;
+      }
+      
+      .admin-panel {
+        padding: 20px;
+      }
+    }
+    
     @media (max-width: 768px) {
       .form-grid-2 {
         grid-template-columns: 1fr;
+        gap: 15px;
       }
       
-      .users-grid {
-        grid-template-columns: 1fr;
+      .tabs {
+        flex-direction: column;
+        padding: 0;
       }
+      
+      .tab {
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border);
+        border-left: 3px solid transparent;
+      }
+      
+      .tab.active {
+        border-bottom-color: var(--border);
+        border-left-color: var(--primary);
+      }
+      
+      .admin-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+      }
+      
+      .users-table {
+        font-size: 0.9rem;
+      }
+      
+      .users-table th,
+      .users-table td {
+        padding: 8px 6px;
+      }
+      
+      .notification {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+        transform: translateY(-150%);
+      }
+      
+      .notification.show {
+        transform: translateY(0);
+      }
+    }
+    
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      .admin-panel {
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+      
+      .panel-title {
+        font-size: 1.3rem;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+
+              /* Agregar al CSS existente */
+        .municipio-checkbox.municipio-assigned {
+            background: #f0f9ff;
+            border-left: 3px solid var(--primary);
+            font-weight: 600;
+        }
+
+        /* Separador visual entre asignados y no asignados */
+        .municipio-checkbox:not(.municipio-assigned) + .municipio-checkbox.municipio-assigned,
+        .municipio-checkbox.municipio-assigned:first-child {
+            border-top: 2px solid var(--border);
+            margin-top: 5px;
+            padding-top: 15px;
+        }
+
+        .municipio-checkbox.municipio-assigned + .municipio-checkbox:not(.municipio-assigned) {
+            border-top: 2px solid var(--border);
+            margin-top: 5px;
+            padding-top: 15px;
+        }
     }
   </style>
 </head>
 <body>
   <div class="admin-container">
-    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-      <h1>Panel de Administración</h1>
-      <button class="btn btn-secondary" onclick="logout()">
-        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+    <!-- CABECERA -->
+    <header class="admin-header">
+      <h1 class="admin-title">
+        <i class="fas fa-cogs"></i>
+        Panel de Administración
+      </h1>
+      <button class="btn btn-secondary" onclick="logout()" aria-label="Cerrar sesión">
+        <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+        Cerrar Sesión
       </button>
     </header>
 
-    <div class="tabs">
-      <div class="tab active" onclick="showTab('usuarios')">Gestión de Usuarios</div>
-      <div class="tab" onclick="showTab('asignaciones')">Asignación de Municipios</div>
-    </div>
+    <!-- SISTEMA DE PESTAÑAS -->
+    <nav class="tabs" role="tablist" aria-label="Secciones de administración">
+      <button 
+        class="tab active" 
+        role="tab"
+        aria-selected="true"
+        aria-controls="usuarios-tab"
+        onclick="showTab('usuarios')"
+      >
+        <i class="fas fa-users" aria-hidden="true"></i>
+        Gestión de Usuarios
+      </button>
+      <button 
+        class="tab" 
+        role="tab"
+        aria-selected="false"
+        aria-controls="asignaciones-tab"
+        onclick="showTab('asignaciones')"
+      >
+        <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+        Asignación de Municipios
+      </button>
+    </nav>
 
-    <!-- Pestaña de Usuarios -->
-    <div id="usuarios" class="tab-content active">
-      <div class="admin-panel">
-        <h2><i class="fas fa-users"></i> Crear Nuevo Usuario</h2>
-        <form id="crearUsuarioForm" class="form-grid-2">
+    <!-- PESTAÑA: GESTIÓN DE USUARIOS -->
+    <section id="usuarios" class="tab-content active" role="tabpanel">
+      <!-- FORMULARIO CREAR USUARIO -->
+      <article class="admin-panel">
+        <h2 class="panel-title">
+          <i class="fas fa-user-plus" aria-hidden="true"></i>
+          Crear Nuevo Usuario
+        </h2>
+        <form id="crearUsuarioForm" class="form-grid-2" novalidate>
           <div class="form-group">
-            <label for="username">Usuario</label>
-            <input type="text" id="username" required>
+            <label for="username" class="form-label">
+              <i class="fas fa-user" aria-hidden="true"></i>
+              Usuario
+            </label>
+            <input 
+              type="text" 
+              id="username" 
+              name="username"
+              class="form-input"
+              required
+              placeholder="Ingrese el nombre de usuario"
+            >
           </div>
+          
           <div class="form-group">
-            <label for="password">Contraseña</label>
-            <input type="password" id="password" required>
+            <label for="password" class="form-label">
+              <i class="fas fa-lock" aria-hidden="true"></i>
+              Contraseña
+            </label>
+            <input 
+              type="password" 
+              id="password" 
+              name="password"
+              class="form-input"
+              required
+              placeholder="Ingrese la contraseña"
+              minlength="6"
+            >
           </div>
+          
           <div class="form-group">
-            <label for="rol">Rol</label>
-            <select id="rol" required>
+            <label for="rol" class="form-label">
+              <i class="fas fa-user-tag" aria-hidden="true"></i>
+              Rol
+            </label>
+            <select id="rol" name="rol" class="form-select" required>
               <option value="">Seleccionar rol</option>
             </select>
           </div>
+          
           <div class="form-group" style="grid-column: span 2;">
             <button type="submit" class="btn btn-primary">
-              <i class="fas fa-plus"></i> Crear Usuario
+              <i class="fas fa-plus" aria-hidden="true"></i>
+              Crear Usuario
             </button>
           </div>
         </form>
-      </div>
+      </article>
 
-      <div class="admin-panel">
-        <h2><i class="fas fa-list"></i> Lista de Usuarios</h2>
-        <div id="listaUsuarios" class="users-grid">
-          <!-- Los usuarios se cargan aquí dinámicamente -->
+      <!-- LISTA DE USUARIOS -->
+      <article class="admin-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 class="panel-title" style="margin: 0;">
+            <i class="fas fa-list" aria-hidden="true"></i>
+            Lista de Usuarios
+          </h2>
+          <div style="font-size: 0.9rem; color: var(--secondary);">
+            Total: <span id="totalUsuarios">0</span> usuarios
+          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Pestaña de Asignaciones -->
-    <div id="asignaciones" class="tab-content">
-      <div class="admin-panel">
-        <h2><i class="fas fa-map-marker-alt"></i> Asignar Municipios</h2>
+        <!-- Filtro de búsqueda -->
+        <div class="search-container">
+          <i class="fas fa-search search-icon" aria-hidden="true"></i>
+          <input 
+            type="text" 
+            id="filtroUsuarios" 
+            class="form-input search-input"
+            placeholder="Buscar usuario por nombre o rol..."
+          >
+        </div>
+
+        <div class="users-table-container">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Fecha Creación</th>
+              </tr>
+            </thead>
+            <tbody id="listaUsuarios">
+              <tr>
+                <td colspan="4" style="text-align: center; padding: 40px; color: var(--gray);">
+                  Cargando usuarios...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <!-- PESTAÑA: ASIGNACIÓN DE MUNICIPIOS -->
+    <section id="asignaciones" class="tab-content" role="tabpanel">
+      <article class="admin-panel">
+        <h2 class="panel-title">
+          <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
+          Asignar Municipios
+        </h2>
+        
         <div class="form-grid-2">
           <div class="form-group">
-            <label for="usuarioAsignacion">Usuario</label>
-            <select id="usuarioAsignacion" required>
-              <option value="">Seleccionar usuario</option>
-            </select>
+            <label class="form-label">
+              <i class="fas fa-user" aria-hidden="true"></i>
+              Usuario
+            </label>
+            <div class="autocomplete-container">
+              <div class="search-container">
+                <i class="fas fa-search search-icon" aria-hidden="true"></i>
+                <input 
+                  type="text" 
+                  id="buscarUsuario" 
+                  class="form-input search-input"
+                  placeholder="Escriba para buscar usuario..."
+                  autocomplete="off"
+                >
+              </div>
+              <div id="autocompleteUsuarios" class="autocomplete-list"></div>
+            </div>
+            <input type="hidden" id="usuarioAsignacionId">
+            <div id="usuarioSeleccionadoInfo" style="margin-top: 10px; display: none;">
+              <div style="background: var(--light); padding: 10px; border-radius: 6px; border-left: 4px solid var(--primary);">
+                <strong id="usuarioSeleccionadoNombre"></strong>
+                <span id="usuarioSeleccionadoRol" style="margin-left: 10px; color: var(--secondary);"></span>
+              </div>
+            </div>
           </div>
+          
           <div class="form-group">
-            <label for="fechaAsignacion">Fecha de Asignación</label>
-            <input type="date" id="fechaAsignacion" required>
+            
           </div>
         </div>
 
         <div class="form-group">
-          <label>Municipios Disponibles</label>
-          <div class="municipios-list" id="municipiosDisponibles">
-            <!-- Lista de municipios con checkboxes -->
+          <label class="form-label">
+            <i class="fas fa-city" aria-hidden="true"></i>
+            Municipios Disponibles
+            <span id="municipiosAsignadosInfo" style="font-size: 0.8rem; color: var(--primary); margin-left: 10px;"></span>
+          </label>
+          
+          <!-- Filtro de municipios -->
+          <div class="search-container" style="margin-bottom: 15px;">
+            <i class="fas fa-search search-icon" aria-hidden="true"></i>
+            <input 
+              type="text" 
+              id="filtroMunicipios" 
+              class="form-input search-input"
+              placeholder="Buscar municipio..."
+            >
+          </div>
+
+          <div class="municipios-container">
+            <div class="municipios-header">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>Seleccione los municipios</span>
+                <small id="contadorMunicipios">0 seleccionados</small>
+              </div>
+            </div>
+            <div class="municipios-list" id="municipiosDisponibles">
+              <div class="no-results">Cargando municipios...</div>
+            </div>
           </div>
         </div>
 
         <button class="btn btn-primary" onclick="asignarMunicipios()">
-          <i class="fas fa-save"></i> Guardar Asignación
+          <i class="fas fa-save" aria-hidden="true"></i>
+          Guardar Asignación
         </button>
-      </div>
-    </div>
+      </article>
+    </section>
   </div>
 
-  <div id="notification" class="notification"></div>
+  <!-- NOTIFICACIONES -->
+  <div id="notification" class="notification" role="alert"></div>
 
   <script src="admin.js"></script>
 </body>

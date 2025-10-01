@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -62,16 +63,17 @@ func ListarUsuarios(w http.ResponseWriter, r *http.Request) {
 }
 
 func AsignarMunicipiosUsuario(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("llega")
 	var asignacion AsignacionMunicipio
 	if err := json.NewDecoder(r.Body).Decode(&asignacion); err != nil {
 		http.Error(w, "Datos inválidos", http.StatusBadRequest)
 		return
 	}
 
-	// Eliminar asignaciones existentes para esa fecha
+	// Eliminar TODAS las asignaciones existentes para ese usuario
 	_, err := db.Exec(
-		"DELETE FROM usuario_municipios WHERE usuario_id = ? AND fecha_asignacion = ?",
-		asignacion.UsuarioID, asignacion.FechaAsignacion)
+		"DELETE FROM usuario_municipios WHERE usuario_id = ?",
+		asignacion.UsuarioID)
 
 	if err != nil {
 		http.Error(w, "Error eliminando asignaciones anteriores", http.StatusInternalServerError)
@@ -81,8 +83,8 @@ func AsignarMunicipiosUsuario(w http.ResponseWriter, r *http.Request) {
 	// Insertar nuevas asignaciones
 	for _, municipioID := range asignacion.MunicipiosIDs {
 		_, err := db.Exec(
-			"INSERT INTO usuario_municipios (usuario_id, municipio_id, fecha_asignacion) VALUES (?, ?, ?)",
-			asignacion.UsuarioID, municipioID, asignacion.FechaAsignacion)
+			"INSERT INTO usuario_municipios (usuario_id, municipio_id) VALUES (?, ?)",
+			asignacion.UsuarioID, municipioID)
 
 		if err != nil {
 			http.Error(w, "Error asignando municipios", http.StatusInternalServerError)
@@ -96,14 +98,14 @@ func AsignarMunicipiosUsuario(w http.ResponseWriter, r *http.Request) {
 
 func ObtenerMunicipiosUsuario(w http.ResponseWriter, r *http.Request) {
 	usuarioID := r.URL.Query().Get("usuario_id")
-	fecha := r.URL.Query().Get("fecha")
+	// Eliminamos el parámetro de fecha
 
 	rows, err := db.Query(`
-		SELECT um.municipio_id, m.nombre 
-		FROM usuario_municipios um 
-		JOIN municipios m ON um.municipio_id = m.idmunicipios 
-		WHERE um.usuario_id = ? AND um.fecha_asignacion = ?`,
-		usuarioID, fecha)
+        SELECT um.municipio_id, m.nombre 
+        FROM usuario_municipios um 
+        JOIN municipios m ON um.municipio_id = m.idmunicipios 
+        WHERE um.usuario_id = ?`,
+		usuarioID)
 
 	if err != nil {
 		http.Error(w, "Error consultando municipios asignados", http.StatusInternalServerError)
