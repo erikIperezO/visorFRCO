@@ -1,0 +1,53 @@
+# =====================================================
+# .gitignore - Archivos que NO deben subirse a Git
+# =====================================================
+
+# Variables de entorno (contienen credenciales)
+.env
+back/.env
+
+# Archivos de configuración con credenciales
+back/config.json
+
+# Binarios compilados
+*.exe
+*.dll
+*.so
+*.dylib
+back/visor-pdf
+back/visor-pdf.exe
+
+# Archivos temporales de Go
+*.test
+*.out
+*.prof
+
+# Directorios de dependencias
+vendor/
+
+# Logs
+*.log
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Archivos temporales
+tmp/
+temp/
+*.tmp
+
+# Node modules (si agregas frontend npm)
+node_modules/
+
+# Archivos de backup
+*.bak
+*.backup

@@ -581,10 +581,21 @@
         <i class="fas fa-cogs"></i>
         Panel de Administración
       </h1>
-      <button class="btn btn-secondary" onclick="logout()" aria-label="Cerrar sesión">
-        <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
-        Cerrar Sesión
-      </button>
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <div style="text-align: right;">
+          <div style="font-weight: 600; color: var(--dark);">
+            <i class="fas fa-user-shield"></i>
+            <span id="admin-user-name">Administrador</span>
+          </div>
+          <div style="font-size: 0.875rem; color: var(--secondary);">
+            <span id="admin-user-role">Admin</span>
+          </div>
+        </div>
+        <button class="btn btn-secondary" onclick="logout()" aria-label="Cerrar sesión">
+          <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+          Cerrar Sesión
+        </button>
+      </div>
     </header>
 
     <!-- SISTEMA DE PESTAÑAS -->

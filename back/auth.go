@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -38,14 +37,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Obtener municipios permitidos para hoy
-	hoy := time.Now().Format("2006-01-02")
+	// Obtener municipios permitidos (sin filtro por fecha)
 	rows, err := db.Query(`
-		SELECT um.municipio_id, m.nombre 
-		FROM usuario_municipios um 
-		JOIN municipios m ON um.municipio_id = m.idmunicipios 
-		WHERE um.usuario_id = ? AND um.fecha_asignacion = ?`,
-		user.ID, hoy)
+		SELECT DISTINCT um.municipio_id, m.nombre
+		FROM usuario_municipios um
+		JOIN municipios m ON um.municipio_id = m.idmunicipios
+		WHERE um.usuario_id = ?`,
+		user.ID)
 
 	if err != nil {
 		http.Error(w, "Error consultando permisos", http.StatusInternalServerError)
@@ -60,11 +58,18 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		municipiosPermitidos = append(municipiosPermitidos, m)
 	}
 
-	// Crear respuesta
+	// Generar token JWT
+	token, err := GenerateJWT(user.ID, user.Username, user.RolID, user.RolNombre)
+	if err != nil {
+		http.Error(w, "Error generando token de autenticación", http.StatusInternalServerError)
+		return
+	}
+
+	// Crear respuesta con token
 	response := map[string]interface{}{
 		"usuario":               user,
 		"municipios_permitidos": municipiosPermitidos,
-		"fecha":                 hoy,
+		"token":                 token, // Token JWT
 	}
 
 	w.Header().Set("Content-Type", "application/json")

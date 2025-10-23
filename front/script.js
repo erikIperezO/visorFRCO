@@ -1,4 +1,23 @@
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = "http://172.19.2.220:8080/api";
+
+// =============================================
+// HELPER PARA FETCH CON AUTENTICACIÓN
+// =============================================
+function authenticatedFetch(url, options = {}) {
+    const token = localStorage.getItem('authToken');
+
+    // Agregar header de autenticación
+    const authOptions = {
+        ...options,
+        headers: {
+            ...options.headers,
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    };
+
+    return fetch(url, authOptions);
+}
 
 // =============================================
 // ESTADO GLOBAL DE LA APLICACIÓN
@@ -141,7 +160,7 @@ class MunicipioService {
 
             // CON USUARIO LOGUEADO - CARGAR DIRECTAMENTE LOS MUNICIPIOS ASIGNADOS
             const url = `${API_BASE}/admin/usuarios/municipios?usuario_id=${AppState.usuarioLogueado.id}`;
-            const response = await fetch(url);
+            const response = await authenticatedFetch(url);
             
             if (response.ok) {
                 AppState.municipios = await response.json();
@@ -212,7 +231,7 @@ class MunicipioService {
         }
         
         try {
-            const response = await fetch(`${API_BASE}/localidades?idmunicipio=${idMunicipio}`);
+            const response = await authenticatedFetch(`${API_BASE}/localidades?idmunicipio=${idMunicipio}`);
             const localidades = await response.json();
 
             DOM.localidadSelect.innerHTML = '<option value="">Seleccione localidad</option>';
@@ -279,7 +298,7 @@ class PDFService {
 
         try {
             const url = `${API_BASE}/pdf?year=${year}&acto=${acto}&municipio=${municipio}&oficialia=${oficialia}&localidad=${localidad}&numActa=${numActa}`;
-            const response = await fetch(url);
+            const response = await authenticatedFetch(url);
             const data = await response.json();
 
             if (data.error) throw new Error(data.error);
@@ -582,7 +601,7 @@ class App {
         // Verificar sesión
         const session = localStorage.getItem("userSession");
         if (!session) {
-            window.location.href = "login.html";
+            window.location.href = "/front/login.html";
             return;
         }
 
@@ -602,7 +621,8 @@ class App {
 // Cerrar sesión
 function logout() {
     localStorage.removeItem('userSession');
-    window.location.href = '/front';
+    localStorage.removeItem('authToken'); // Eliminar token JWT
+    window.location.href = '/front/login.html';
 }
 
 document.addEventListener('DOMContentLoaded', () => App.init());

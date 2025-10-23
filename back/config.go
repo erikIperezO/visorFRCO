@@ -2,7 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -15,13 +18,63 @@ type Config struct {
 }
 
 func LoadConfig() (Config, error) {
-	var config Config
-	file, err := os.Open("config.json")
-	if err != nil {
-		return config, err
-	}
-	defer file.Close()
+	// Intentar cargar .env si existe (ignorar error si no existe)
+	_ = godotenv.Load(".env")
+	_ = godotenv.Load("back/.env")
 
-	err = json.NewDecoder(file).Decode(&config)
-	return config, err
+	// Prioridad 1: Variables de entorno
+	config := Config{
+		PDFBasePath: getEnv("PDF_BASE_PATH", ""),
+		DBUser:      getEnv("DB_USER", ""),
+		DBPassword:  getEnv("DB_PASSWORD", ""),
+		DBHost:      getEnv("DB_HOST", "localhost"),
+		DBPort:      getEnv("DB_PORT", "3306"),
+		DBName:      getEnv("DB_NAME", "digitalizacion"),
+	}
+
+	// Si no hay variables de entorno, intentar cargar desde config.json
+	if config.DBUser == "" || config.DBPassword == "" || config.PDFBasePath == "" {
+		fmt.Println("⚠️  Variables de entorno no encontradas, usando config.json...")
+
+		// Intentar buscar config.json en múltiples ubicaciones
+		configPaths := []string{
+			"back/config.json",   // Cuando se ejecuta desde la raíz del proyecto
+			"config.json",        // Cuando se ejecuta desde back/
+			"../config.json",     // Por si acaso
+			"./back/config.json", // Ruta alternativa
+		}
+
+		var file *os.File
+		var err error
+
+		// Buscar el archivo en las ubicaciones posibles
+		for _, path := range configPaths {
+			file, err = os.Open(path)
+			if err == nil {
+				// Archivo encontrado
+				defer file.Close()
+				err = json.NewDecoder(file).Decode(&config)
+				if err != nil {
+					return config, fmt.Errorf("error decodificando config.json: %v", err)
+				}
+				fmt.Printf("✅ Configuración cargada desde: %s\n", path)
+				return config, nil
+			}
+		}
+
+		// Si no se encontró en ninguna ubicación
+		return config, fmt.Errorf("config.json no encontrado y sin variables de entorno")
+	}
+
+	fmt.Println("✅ Configuración cargada desde variables de entorno")
+	return config, nil
+}
+
+// getEnv obtiene una variable de entorno o retorna un valor por defecto
+func getEnv(key, defaultValue string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
+	return value
 }

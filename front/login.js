@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = "http://172.19.2.220:8080/api";
 
 const DOM = {
   loginForm: document.getElementById("login-form"),
@@ -30,8 +30,17 @@ class AuthService {
 
       if (response.ok) {
         const data = await response.json();
+
+        // Guardar sesión Y token por separado
         localStorage.setItem("userSession", JSON.stringify(data));
-        window.location.href = "index.html"; // Redirigir al main
+        localStorage.setItem("authToken", data.token); // Guardar token JWT
+
+        // Redirigir según el rol
+        if (data.usuario.rol_nombre === "admin" || data.usuario.rol_id === 1) {
+          window.location.href = "/front/admin.html";
+        } else {
+          window.location.href = "/front/index.html";
+        }
       } else {
         Notification.show("Credenciales incorrectas", "error");
       }
@@ -43,7 +52,13 @@ class AuthService {
   static verificarSesion() {
     const session = localStorage.getItem("userSession");
     if (session) {
-      window.location.href = "index.html"; // Si ya hay sesión activa, directo al main
+      const data = JSON.parse(session);
+      // Si ya hay sesión activa, redirigir según el rol
+      if (data.usuario.rol_nombre === "admin" || data.usuario.rol_id === 1) {
+        window.location.href = "/front/admin.html";
+      } else {
+        window.location.href = "/front/index.html";
+      }
     }
   }
 }

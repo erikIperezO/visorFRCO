@@ -2,7 +2,7 @@
 // CONFIGURACIÓN Y CONSTANTES
 // =============================================
 const CONFIG = {
-    API_BASE: "http://localhost:8080/api",
+    API_BASE: "http://172.19.2.220:8080/api",
     NOTIFICATION_TIMEOUT: 3000
 };
 
@@ -47,9 +47,12 @@ let userMunicipalities = new Map();
 const ApiService = {
     async request(endpoint, options = {}) {
         const url = `${CONFIG.API_BASE}${endpoint}`;
+        const token = localStorage.getItem('authToken');
+
         const config = {
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`, // Agregar token JWT
                 ...options.headers
             },
             ...options
@@ -774,7 +777,46 @@ async function asignarMunicipios() {
 
 function logout() {
     localStorage.removeItem('userSession');
-    window.location.href = '/front';
+    localStorage.removeItem('authToken'); // Eliminar token JWT
+    window.location.href = '/front/login.html';
+}
+
+// =============================================
+// AUTENTICACIÓN
+// =============================================
+function verificarSesion() {
+    const session = localStorage.getItem('userSession');
+
+    if (!session) {
+        // No hay sesión, redirigir a login
+        window.location.href = '/front/login.html';
+        return null;
+    }
+
+    const data = JSON.parse(session);
+    const usuario = data.usuario;
+
+    // Verificar que sea administrador
+    if (usuario.rol_nombre !== 'admin' && usuario.rol_id !== 1) {
+        alert('Acceso denegado. Solo administradores pueden acceder a esta página.');
+        window.location.href = '/front/index.html';
+        return null;
+    }
+
+    return usuario;
+}
+
+function mostrarInfoUsuario(usuario) {
+    // Actualizar información del usuario en la interfaz si existe el elemento
+    const userNameElement = document.getElementById('admin-user-name');
+    const userRoleElement = document.getElementById('admin-user-role');
+
+    if (userNameElement) {
+        userNameElement.textContent = usuario.username;
+    }
+    if (userRoleElement) {
+        userRoleElement.textContent = usuario.rol_nombre || 'Administrador';
+    }
 }
 
 // =============================================
@@ -782,17 +824,26 @@ function logout() {
 // =============================================
 document.addEventListener('DOMContentLoaded', async () => {
     try {
+        // Verificar sesión PRIMERO
+        const usuario = verificarSesion();
+        if (!usuario) {
+            return; // Ya se redirigió
+        }
+
+        // Mostrar info del usuario logueado
+        mostrarInfoUsuario(usuario);
+
         // Inicializar sistemas
         FilterManager.init();
         AutocompleteManager.init();
-        
+
         // Cargar datos
         await DataManager.loadRoles();
         await DataManager.loadUsers();
         await DataManager.loadMunicipalities();
-        
+
         FormHandler.init();
-        
+
         console.log('✅ Sistema de administración inicializado correctamente');
     } catch (error) {
         console.error('❌ Error inicializando la aplicación:', error);

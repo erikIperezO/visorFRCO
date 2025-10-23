@@ -80,14 +80,14 @@ func AsignarMunicipiosUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Insertar nuevas asignaciones
+	// Insertar nuevas asignaciones (sin fecha - fecha_asignacion será NULL)
 	for _, municipioID := range asignacion.MunicipiosIDs {
 		_, err := db.Exec(
-			"INSERT INTO usuario_municipios (usuario_id, municipio_id) VALUES (?, ?)",
+			"INSERT INTO usuario_municipios (usuario_id, municipio_id, fecha_asignacion) VALUES (?, ?, NULL)",
 			asignacion.UsuarioID, municipioID)
 
 		if err != nil {
-			http.Error(w, "Error asignando municipios", http.StatusInternalServerError)
+			http.Error(w, "Error asignando municipios: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
@@ -101,9 +101,9 @@ func ObtenerMunicipiosUsuario(w http.ResponseWriter, r *http.Request) {
 	// Eliminamos el parámetro de fecha
 
 	rows, err := db.Query(`
-        SELECT um.municipio_id, m.nombre 
-        FROM usuario_municipios um 
-        JOIN municipios m ON um.municipio_id = m.idmunicipios 
+        SELECT DISTINCT um.municipio_id, m.nombre
+        FROM usuario_municipios um
+        JOIN municipios m ON um.municipio_id = m.idmunicipios
         WHERE um.usuario_id = ?`,
 		usuarioID)
 

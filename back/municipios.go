@@ -8,19 +8,18 @@ import (
 
 func GetMunicipios(w http.ResponseWriter, r *http.Request) {
 	usuarioID := r.URL.Query().Get("usuario_id")
-	fecha := r.URL.Query().Get("fecha")
 
 	var rows *sql.Rows
 	var err error
 
-	if usuarioID != "" && fecha != "" {
-		// Municipios permitidos para ese usuario en esa fecha
+	if usuarioID != "" {
+		// Municipios permitidos para ese usuario (sin filtro por fecha)
 		rows, err = db.Query(`
-			SELECT m.idmunicipios, m.nombre 
-			FROM usuario_municipios um 
-			JOIN municipios m ON um.municipio_id = m.idmunicipios 
-			WHERE um.usuario_id = ? AND um.fecha_asignacion = ?`,
-			usuarioID, fecha)
+			SELECT DISTINCT m.idmunicipios, m.nombre
+			FROM usuario_municipios um
+			JOIN municipios m ON um.municipio_id = m.idmunicipios
+			WHERE um.usuario_id = ?`,
+			usuarioID)
 	} else {
 		// Todos los municipios (para administradores)
 		rows, err = db.Query("SELECT idmunicipios, nombre FROM municipios")
