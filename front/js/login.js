@@ -37,9 +37,9 @@ class AuthService {
 
         // Redirigir según el rol
         if (data.usuario.rol_nombre === "admin" || data.usuario.rol_id === 1) {
-          window.location.href = "/front/admin.html";
+          window.location.href = "/front/public/admin.html";
         } else {
-          window.location.href = "/front/index.html";
+          window.location.href = "/front/public/index.html";
         }
       } else {
         Notification.show("Credenciales incorrectas", "error");

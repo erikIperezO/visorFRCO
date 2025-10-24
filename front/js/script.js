@@ -601,7 +601,7 @@ class App {
         // Verificar sesión
         const session = localStorage.getItem("userSession");
         if (!session) {
-            window.location.href = "/front/login.html";
+            window.location.href = "/front/public/login.html";
             return;
         }
 
@@ -622,7 +622,7 @@ class App {
 function logout() {
     localStorage.removeItem('userSession');
     localStorage.removeItem('authToken'); // Eliminar token JWT
-    window.location.href = '/front/login.html';
+    window.location.href = '/front/public/login.html';
 }
 
 document.addEventListener('DOMContentLoaded', () => App.init());

@@ -2,52 +2,114 @@
 # .gitignore - Archivos que NO deben subirse a Git
 # =====================================================
 
+# ==================== SEGURIDAD ====================
 # Variables de entorno (contienen credenciales)
 .env
 back/.env
+microservice/.env
 
 # Archivos de configuración con credenciales
 back/config.json
+config.json
 
-# Binarios compilados
+# ==================== BINARIOS ====================
+# Ejecutables compilados
 *.exe
 *.dll
 *.so
 *.dylib
 back/visor-pdf
 back/visor-pdf.exe
+back/build/
+build/
+dist/
 
+# ==================== GO ====================
 # Archivos temporales de Go
 *.test
 *.out
 *.prof
 
-# Directorios de dependencias
+# Directorios de dependencias Go
 vendor/
 
-# Logs
-*.log
+# ==================== PYTHON ====================
+# Entornos virtuales Python
+venv/
+env/
+ENV/
+.venv
+microservice/venv/
+microservice/env/
 
-# Archivos del sistema operativo
-.DS_Store
+# Caché Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+.pytest_cache/
+
+# ==================== LOGS ====================
+*.log
+logs/
+
+# ==================== SISTEMA OPERATIVO ====================
+# Windows
 Thumbs.db
 desktop.ini
+ehthumbs.db
 
-# IDEs y editores
-.vscode/
-.idea/
-*.swp
-*.swo
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
 *~
 
-# Archivos temporales
+# ==================== IDEs Y EDITORES ====================
+# VS Code
+.vscode/
+*.code-workspace
+
+# JetBrains (IntelliJ, GoLand, PyCharm)
+.idea/
+*.iml
+
+# Vim
+*.swp
+*.swo
+*.swn
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Claude Code
+.claude/
+
+# ==================== NODE/NPM ====================
+node_modules/
+package-lock.json
+yarn.lock
+
+# ==================== TEMPORALES ====================
 tmp/
 temp/
 *.tmp
+*.temp
 
-# Node modules (si agregas frontend npm)
-node_modules/
-
-# Archivos de backup
+# ==================== BACKUPS ====================
 *.bak
 *.backup
+*.old
+
+# ==================== BASES DE DATOS ====================
+# SQLite (si se usa localmente)
+*.db
+*.sqlite
+*.sqlite3
+
+# Dumps de BD locales
+*.sql.backup
+database_backup_*

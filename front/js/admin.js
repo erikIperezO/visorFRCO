@@ -778,7 +778,7 @@ async function asignarMunicipios() {
 function logout() {
     localStorage.removeItem('userSession');
     localStorage.removeItem('authToken'); // Eliminar token JWT
-    window.location.href = '/front/login.html';
+    window.location.href = '/front/public/login.html';
 }
 
 // =============================================
@@ -789,7 +789,7 @@ function verificarSesion() {
 
     if (!session) {
         // No hay sesión, redirigir a login
-        window.location.href = '/front/login.html';
+        window.location.href = '/front/public/login.html';
         return null;
     }
 
@@ -799,7 +799,7 @@ function verificarSesion() {
     // Verificar que sea administrador
     if (usuario.rol_nombre !== 'admin' && usuario.rol_id !== 1) {
         alert('Acceso denegado. Solo administradores pueden acceder a esta página.');
-        window.location.href = '/front/index.html';
+        window.location.href = '/front/public/index.html';
         return null;
     }
 

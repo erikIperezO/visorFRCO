@@ -1,0 +1,10 @@
+{
+  "_comment": "INSTRUCCIONES: Copia este archivo como 'config.json' y reemplaza los valores de ejemplo con tus credenciales reales. NUNCA subas config.json a Git.",
+
+  "pdfBasePath": "/ruta/a/tus/pdfs/decadas",
+  "dbUser": "tu_usuario_db",
+  "dbPassword": "tu_password_seguro_aqui",
+  "dbHost": "localhost",
+  "dbPort": "3306",
+  "dbName": "digitalizacion"
+}

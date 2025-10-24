@@ -1,9 +1,0 @@
-{
-  "pdfBasePath": "e:/decadas",
-  "dbUser": "digitalizacion",
-  "dbPassword": "qwerty25",
-  "dbHost": "localhost",
-  "dbPort": "3306",
-  "dbName": "digitalizacion"
-
-}

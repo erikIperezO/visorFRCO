@@ -1,0 +1,21 @@
+# =====================================================
+# Dependencias del Microservicio PDF - Python
+# =====================================================
+
+# Framework web
+Flask==3.0.0
+
+# Manipulación de PDFs
+PyMuPDF==1.23.8
+
+# Variables de entorno (opcional)
+python-dotenv==1.0.0
+
+# CORS para desarrollo (opcional)
+flask-cors==4.0.0
+
+# Rate limiting (opcional, para producción)
+# Flask-Limiter==3.5.0
+
+# Servidor WSGI para producción (opcional)
+# gunicorn==21.2.0
