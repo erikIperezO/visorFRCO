@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"fmt"
@@ -7,7 +7,15 @@ import (
 	"net/url"
 	"path/filepath"
 	"strconv"
+
+	"visor-pdf/internal/config"
 )
+
+var Cfg config.Config
+
+func SetConfig(cfg config.Config) {
+	Cfg = cfg
+}
 
 func GetPDFAsImage(w http.ResponseWriter, r *http.Request) {
 	year := r.URL.Query().Get("year")
@@ -44,7 +52,7 @@ func GetPDFAsImage(w http.ResponseWriter, r *http.Request) {
 
 	// Ruta del PDF
 	pdfPath := filepath.Join(
-		config.PDFBasePath,
+		Cfg.PDFBasePath,
 		fmt.Sprintf("decada %s", decada),
 		actoFmt,
 		year,

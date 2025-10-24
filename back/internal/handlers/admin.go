@@ -1,15 +1,18 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
 
+	"visor-pdf/internal/database"
+	"visor-pdf/internal/models"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
 func CrearUsuario(w http.ResponseWriter, r *http.Request) {
-	var user Usuario
+	var user models.Usuario
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		http.Error(w, "Datos inválidos", http.StatusBadRequest)
 		return
@@ -22,7 +25,7 @@ func CrearUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := db.Exec(
+	result, err := database.DB.Exec(
 		"INSERT INTO usuarios (username, password_hash, rol_id, activo) VALUES (?, ?, ?, ?)",
 		user.Username, string(hashedPassword), user.RolID, true)
 
@@ -40,9 +43,9 @@ func CrearUsuario(w http.ResponseWriter, r *http.Request) {
 }
 
 func ListarUsuarios(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Query(`
-		SELECT u.id, u.username, u.activo, u.rol_id, r.nombre as rol_nombre 
-		FROM usuarios u 
+	rows, err := database.DB.Query(`
+		SELECT u.id, u.username, u.activo, u.rol_id, r.nombre as rol_nombre
+		FROM usuarios u
 		JOIN roles r ON u.rol_id = r.id
 	`)
 	if err != nil {
@@ -51,9 +54,9 @@ func ListarUsuarios(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	var usuarios []Usuario
+	var usuarios []models.Usuario
 	for rows.Next() {
-		var u Usuario
+		var u models.Usuario
 		rows.Scan(&u.ID, &u.Username, &u.Activo, &u.RolID, &u.RolNombre)
 		usuarios = append(usuarios, u)
 	}
@@ -64,14 +67,14 @@ func ListarUsuarios(w http.ResponseWriter, r *http.Request) {
 
 func AsignarMunicipiosUsuario(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("llega")
-	var asignacion AsignacionMunicipio
+	var asignacion models.AsignacionMunicipio
 	if err := json.NewDecoder(r.Body).Decode(&asignacion); err != nil {
 		http.Error(w, "Datos inválidos", http.StatusBadRequest)
 		return
 	}
 
 	// Eliminar TODAS las asignaciones existentes para ese usuario
-	_, err := db.Exec(
+	_, err := database.DB.Exec(
 		"DELETE FROM usuario_municipios WHERE usuario_id = ?",
 		asignacion.UsuarioID)
 
@@ -82,7 +85,7 @@ func AsignarMunicipiosUsuario(w http.ResponseWriter, r *http.Request) {
 
 	// Insertar nuevas asignaciones (sin fecha - fecha_asignacion será NULL)
 	for _, municipioID := range asignacion.MunicipiosIDs {
-		_, err := db.Exec(
+		_, err := database.DB.Exec(
 			"INSERT INTO usuario_municipios (usuario_id, municipio_id, fecha_asignacion) VALUES (?, ?, NULL)",
 			asignacion.UsuarioID, municipioID)
 
@@ -100,7 +103,7 @@ func ObtenerMunicipiosUsuario(w http.ResponseWriter, r *http.Request) {
 	usuarioID := r.URL.Query().Get("usuario_id")
 	// Eliminamos el parámetro de fecha
 
-	rows, err := db.Query(`
+	rows, err := database.DB.Query(`
         SELECT DISTINCT um.municipio_id, m.nombre
         FROM usuario_municipios um
         JOIN municipios m ON um.municipio_id = m.idmunicipios
@@ -113,9 +116,9 @@ func ObtenerMunicipiosUsuario(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	var municipios []Municipio
+	var municipios []models.Municipio
 	for rows.Next() {
-		var m Municipio
+		var m models.Municipio
 		rows.Scan(&m.ID, &m.Nombre)
 		municipios = append(municipios, m)
 	}
@@ -125,16 +128,16 @@ func ObtenerMunicipiosUsuario(w http.ResponseWriter, r *http.Request) {
 }
 
 func ObtenerRoles(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Query("SELECT id, nombre FROM roles")
+	rows, err := database.DB.Query("SELECT id, nombre FROM roles")
 	if err != nil {
 		http.Error(w, "Error consultando roles", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
 
-	var roles []Rol
+	var roles []models.Rol
 	for rows.Next() {
-		var r Rol
+		var r models.Rol
 		rows.Scan(&r.ID, &r.Nombre)
 		roles = append(roles, r)
 	}

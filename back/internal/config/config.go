@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"encoding/json"
@@ -19,8 +19,9 @@ type Config struct {
 
 func LoadConfig() (Config, error) {
 	// Intentar cargar .env si existe (ignorar error si no existe)
-	_ = godotenv.Load(".env")
-	_ = godotenv.Load("back/.env")
+	_ = godotenv.Load("../../.env")      // Desde cmd/server/
+	_ = godotenv.Load(".env")            // Desde back/
+	_ = godotenv.Load("back/.env")       // Desde raíz
 
 	// Prioridad 1: Variables de entorno
 	config := Config{
@@ -38,10 +39,10 @@ func LoadConfig() (Config, error) {
 
 		// Intentar buscar config.json en múltiples ubicaciones
 		configPaths := []string{
-			"back/config.json",   // Cuando se ejecuta desde la raíz del proyecto
-			"config.json",        // Cuando se ejecuta desde back/
-			"../config.json",     // Por si acaso
-			"./back/config.json", // Ruta alternativa
+			"../../config.json",      // Cuando se ejecuta desde cmd/server/
+			"config.json",            // Cuando se ejecuta desde back/
+			"back/config.json",       // Cuando se ejecuta desde la raíz del proyecto
+			"../../../config.json",   // Por si acaso
 		}
 
 		var file *os.File

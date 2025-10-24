@@ -1,4 +1,4 @@
-package main
+package models
 
 type Municipio struct {
 	ID     int    `json:"id"`

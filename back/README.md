@@ -9,14 +9,33 @@ Backend del sistema de visualización de PDFs del Registro Civil de Oaxaca. API 
 ```
 back/
 ├── cmd/                    # Puntos de entrada
-│   ├── server/            # (futuro: main.go)
-│   └── tools/             # (futuro: utilidades CLI)
-├── build/                 # Binarios compilados (gitignored)
-├── *.go                   # Archivos fuente
-├── go.mod                 # Definición de módulo Go
-├── go.sum                 # Checksums de dependencias
-├── .env.example           # Plantilla de variables de entorno
-└── config.json.example    # Plantilla de configuración
+│   ├── server/
+│   │   └── main.go        # Servidor principal
+│   └── tools/
+│       └── generar_hash.go # Generador de hashes bcrypt
+│
+├── internal/               # Código interno (no importable fuera)
+│   ├── config/
+│   │   └── config.go      # Configuración (.env y config.json)
+│   ├── database/
+│   │   └── database.go    # Conexión a BD con pool
+│   ├── models/
+│   │   └── models.go      # Estructuras de datos
+│   ├── auth/
+│   │   ├── auth.go        # Handler de login
+│   │   ├── jwt.go         # Generación/validación JWT
+│   │   └── middleware.go  # Middlewares de autenticación
+│   └── handlers/
+│       ├── admin.go       # Gestión de usuarios
+│       ├── municipios.go  # Endpoints de municipios/localidades
+│       └── pdf.go         # Proxy al microservicio PDF
+│
+├── build/                  # Binarios compilados (gitignored)
+├── go.mod                  # Definición de módulo Go
+├── go.sum                  # Checksums de dependencias
+├── .env.example            # Plantilla de variables de entorno
+├── config.json.example     # Plantilla de configuración
+└── README.md               # Esta documentación
 ```
 
 ---
@@ -71,8 +90,12 @@ go mod download
 ### 3. Ejecutar
 
 ```bash
-# Modo desarrollo
+# Modo desarrollo (desde cmd/server/)
+cd cmd/server
 go run .
+
+# O desde la raíz del proyecto back/
+go run cmd/server/main.go
 
 # Escucharás en: http://localhost:8080
 ```
@@ -80,15 +103,19 @@ go run .
 ### 4. Compilar
 
 ```bash
+# Desde cmd/server/
+cd cmd/server
+
 # Windows
-go build -o build/visor-pdf.exe
+go build -o ../../build/visor-pdf.exe
 
 # Linux/macOS
-go build -o build/visor-pdf
+go build -o ../../build/visor-pdf
 
 # Ejecutar binario
-./build/visor-pdf.exe  # Windows
-./build/visor-pdf      # Linux/macOS
+cd ../../build
+./visor-pdf.exe  # Windows
+./visor-pdf      # Linux/macOS
 ```
 
 ---
@@ -181,28 +208,31 @@ Ver documentación completa en `/docs/api/`
 
 ## 🗂️ Archivos Principales
 
-### Core
+### Punto de Entrada
 
-- **`main.go`** - Punto de entrada, definición de rutas, CORS
-- **`config.go`** - Carga de configuración (.env o config.json)
-- **`database.go`** - Conexión a base de datos con pool
-- **`models.go`** - Estructuras de datos (User, Municipio, etc.)
+- **`cmd/server/main.go`** - Servidor HTTP, definición de rutas, CORS
+
+### Configuración y Base de Datos
+
+- **`internal/config/config.go`** - Carga de configuración (.env o config.json)
+- **`internal/database/database.go`** - Conexión a BD con pool de conexiones
+- **`internal/models/models.go`** - Estructuras de datos (Usuario, Municipio, etc.)
 
 ### Autenticación
 
-- **`auth.go`** - Endpoint de login, validación de credenciales
-- **`jwt.go`** - Generación y validación de tokens JWT
-- **`middleware.go`** - Middlewares de autenticación
+- **`internal/auth/auth.go`** - Handler de login, validación de credenciales
+- **`internal/auth/jwt.go`** - Generación y validación de tokens JWT
+- **`internal/auth/middleware.go`** - Middlewares de autenticación (AuthMiddleware, AdminMiddleware)
 
 ### Handlers
 
-- **`pdf.go`** - Proxy al microservicio de PDFs
-- **`admin.go`** - Gestión de usuarios y asignaciones
-- **`municipios.go`** - Endpoints de municipios y localidades
+- **`internal/handlers/pdf.go`** - Proxy al microservicio de PDFs
+- **`internal/handlers/admin.go`** - Gestión de usuarios y asignaciones de municipios
+- **`internal/handlers/municipios.go`** - Endpoints de municipios y localidades
 
 ### Utilidades
 
-- **`generar_hash.go`** - Generador de hashes bcrypt (CLI)
+- **`cmd/tools/generar_hash.go`** - Generador de hashes bcrypt para contraseñas (CLI)
 
 ---
 
@@ -211,8 +241,8 @@ Ver documentación completa en `/docs/api/`
 Para crear nuevos usuarios con contraseñas hasheadas:
 
 ```bash
-# Editar generar_hash.go con la contraseña deseada
-go run generar_hash.go
+# Editar cmd/tools/generar_hash.go con la contraseña deseada
+go run cmd/tools/generar_hash.go
 
 # Output: $2a$10$...
 # Copiar hash a INSERT INTO usuarios
@@ -242,24 +272,19 @@ usuario:password@tcp(host:port)/database?parseTime=true
 
 ## 🛠️ Desarrollo
 
-### Estructura Recomendada (Futuro)
+### Estructura Actual (Siguiendo Best Practices de Go)
 
-```
-back/
-├── cmd/
-│   ├── server/
-│   │   └── main.go
-│   └── tools/
-│       └── generar_hash.go
-├── internal/
-│   ├── config/
-│   ├── database/
-│   ├── models/
-│   ├── auth/
-│   └── handlers/
-├── build/
-└── go.mod
-```
+✅ **Ya implementada** - El proyecto sigue la estructura estándar de Go con:
+
+- `cmd/` - Puntos de entrada (ejecutables)
+- `internal/` - Código interno organizado por paquetes
+- `build/` - Binarios compilados (gitignored)
+
+Esta estructura facilita:
+- Separación clara de responsabilidades
+- Reutilización de código
+- Testing independiente por paquete
+- Escalabilidad del proyecto
 
 ### Hot Reload (Opcional)
 

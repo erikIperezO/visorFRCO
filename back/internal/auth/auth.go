@@ -1,24 +1,27 @@
-package main
+package auth
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
 
+	"visor-pdf/internal/database"
+	"visor-pdf/internal/models"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
 func Login(w http.ResponseWriter, r *http.Request) {
-	var loginReq LoginRequest
+	var loginReq models.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&loginReq); err != nil {
 		http.Error(w, "Datos inválidos", http.StatusBadRequest)
 		return
 	}
 
 	// Buscar usuario
-	var user Usuario
+	var user models.Usuario
 	var passwordHash string
-	err := db.QueryRow(`
+	err := database.DB.QueryRow(`
 		SELECT u.id, u.username, u.password_hash, u.activo, u.rol_id, r.nombre as rol_nombre 
 		FROM usuarios u 
 		JOIN roles r ON u.rol_id = r.id 
@@ -38,7 +41,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Obtener municipios permitidos (sin filtro por fecha)
-	rows, err := db.Query(`
+	rows, err := database.DB.Query(`
 		SELECT DISTINCT um.municipio_id, m.nombre
 		FROM usuario_municipios um
 		JOIN municipios m ON um.municipio_id = m.idmunicipios
@@ -51,9 +54,9 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	var municipiosPermitidos []Municipio
+	var municipiosPermitidos []models.Municipio
 	for rows.Next() {
-		var m Municipio
+		var m models.Municipio
 		rows.Scan(&m.ID, &m.Nombre)
 		municipiosPermitidos = append(municipiosPermitidos, m)
 	}
